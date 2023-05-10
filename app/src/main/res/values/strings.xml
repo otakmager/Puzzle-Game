@@ -1,4 +1,51 @@
 <resources>
     <string name="app_name">Puzzle Game</string>
     <string name="app_version">Version 1.0</string>
+    <string name="preference_file_key">com.gonzales.mark.n_puzzle.PREFERENCE_FILE_KEY</string>
+
+    <!-- First button text -->
+    <string name="randomizing">Shuffling</string>
+    <string name="inversions">Counting Inversions</string>
+    <string name="randomized">Show Solution</string>
+    <string name="new_game">New Game</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+
+    <!-- Second button text -->
+    <string name="skip">Skip Solution</string>
+    <string name="upload_picture">Upload Picture</string>
+
+    <!-- Success message -->
+    <string name="user_solved">Nice!</string>
+    <string name="fastest_score">Fast!</string>
+    <string name="high_score">Bravo!</string>
+    <string name="fewest_score">Great!</string>
+    <string name="computer_solved">Moves</string>
+
+    <!-- Game statistics -->
+    <string name="default_move_count">-</string>
+    <string name="default_timer">-:--:--</string>
+
+    <string name="move_count">Move Count:&#xA0;</string>
+    <string name="fewest_moves">Fewest:&#xA0;</string>
+    <string name="timer">Timer:&#xA0;</string>
+    <string name="fastest_time">Fastest:&#xA0;</string>
+
+    <!-- Trivia -->
+    <string name="trivia">An 8-puzzle can be solved in at most 31 moves</string>
+    <string name="trivia_a_star">This app uses the A* algorithm to solve the puzzle</string>
+
+    <!-- Puzzle images -->
+    <string name="default_image">Lobster Shoob</string>
+    <string-array name="puzzle_images">
+        <item>LOBSTER SHOOB</item>
+        <item>ROSE-COLORED LIFE</item>
+        <item>KIKYO &amp; INUYASHA</item>
+        <item>YUKO, MARU &amp; MORO</item>
+        <item>JIGOKU SHOUJO</item>
+        <item>CUSTOM</item>
+    </string-array>
+
+    <!-- Image upload -->
+    <string name="no_permission">Insufficient permission to access Gallery</string>
 </resources>
