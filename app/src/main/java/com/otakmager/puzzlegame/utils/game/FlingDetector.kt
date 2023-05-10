@@ -1,5 +1,10 @@
 package com.otakmager.puzzlegame.utils.game
 
+import android.view.MotionEvent
+import com.otakmager.puzzlegame.data.game.FlingDirection
+import kotlin.math.PI
+import kotlin.math.atan2
+
 class FlingDetector {
     /**
      * Companion object containing the constants and methods for identifying the direction
