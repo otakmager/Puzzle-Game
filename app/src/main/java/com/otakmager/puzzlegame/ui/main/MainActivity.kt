@@ -7,7 +7,6 @@ import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,11 +14,12 @@ import android.os.Message
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewTreeObserver
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ImageButton
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.otakmager.puzzlegame.R
 import com.otakmager.puzzlegame.data.game.FlingDirection
@@ -28,7 +28,6 @@ import com.otakmager.puzzlegame.data.game.PuzzleImage
 import com.otakmager.puzzlegame.data.state.SolveStatus
 import com.otakmager.puzzlegame.data.state.StatePair
 import com.otakmager.puzzlegame.databinding.ActivityMainBinding
-import com.otakmager.puzzlegame.ui.custom.GridViewGesture
 import com.otakmager.puzzlegame.utils.event.OnFlingListener
 import com.otakmager.puzzlegame.utils.game.*
 import java.util.*
@@ -36,7 +35,6 @@ import java.util.Collections.swap
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -129,6 +127,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**************************************
+     * Methods Related to Initial Actions *
+     **************************************/
     private fun initComponents() {
         setBtnShuffleAction()
         setBtnUploadAction()
@@ -146,7 +147,6 @@ class MainActivity : AppCompatActivity() {
         indexOfCustom = puzzleImageChoices.lastIndex
     }
 
-
     private fun initSharedPreferences() {
         sp = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
 
@@ -163,10 +163,6 @@ class MainActivity : AppCompatActivity() {
         displayStats()
     }
 
-    /**
-     * Initializes the handlers related to shuffling the tiles, triggering the game timer, and
-     * displaying the solution.
-     */
     private fun initHandlers() {
         /* Initialize thread pool executor and handler related to the shuffling animation. */
         shuffleScheduler = Executors.newScheduledThreadPool(NUM_TILES)
@@ -189,9 +185,6 @@ class MainActivity : AppCompatActivity() {
         solveDisplayHandler = Handler(Looper.getMainLooper())
     }
 
-    /**
-     * Initializes the puzzle state and the images of the tiles in the grid.
-     */
     private fun initStateAndTileImages() {
         goalPuzzleState = ArrayList(NUM_TILES)
         puzzleState = ArrayList(NUM_TILES)
@@ -210,26 +203,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Resets the puzzle state back to the original state (that is, the goal state).
-     */
     private fun resetState() {
         puzzleState = goalPuzzleState.toMutableList() as ArrayList<Int>
         blankTilePos = BLANK_TILE_MARKER
     }
 
-    /**
-     * Initializes the dynamic components and listeners related to the puzzle grid.
-     */
     private fun initPuzzle() {
         setTouchSlopThreshold()
         setOnFlingListener()
         setDimensions()
     }
 
-    /**
-     * Initializes the activity result launcher related to choosing an image from the Gallery.
-     */
     private fun initGalleryLauncher() {
         galleryLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
@@ -242,11 +226,6 @@ class MainActivity : AppCompatActivity() {
     /*************************************************
      * Methods Related to Button and Spinner Actions *
      *************************************************/
-
-    /**
-     * Sets the click event listener for the button for shuffling the tiles (if the game is not yet
-     * in session) or displaying the solution (if the game is already in session).
-     */
     private fun setBtnShuffleAction() {
         binding.btnShuffle.setOnClickListener {
             if (isSolutionDisplay) {
@@ -259,11 +238,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Sets the click event listener for the button for selecting a custom puzzle image from the
-     * Gallery (if the game is not yet in session) or skipping the solution (if the solution
-     * walkthrough is currently being played).
-     */
     private fun setBtnUploadAction() {
         binding.btnUpload.setOnClickListener {
             if (isSolutionDisplay) {
@@ -278,9 +252,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Sets the item selection event listener for the spinner.
-     */
     private fun setSpnPuzzleAction() {
         binding.spnPuzzle.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             /**
@@ -324,19 +295,11 @@ class MainActivity : AppCompatActivity() {
     /*****************************************
      * Methods Related to Statistics Display *
      *****************************************/
-
-    /**
-     * Displays the game statistics (namely the fewest number of moves and the fastest time taken
-     * to solve the 8-puzzle).
-     */
     private fun displayStats() {
         displayFewestMoves()
         displayFastestTime()
     }
 
-    /**
-     * Displays the fewest number of moves taken to solve the 8-puzzle.
-     */
     private fun displayFewestMoves() {
         binding.tvFewestMoves.text = if (fewestMoves == DEFAULT_FEWEST_MOVES) {
             getString(R.string.default_move_count)
@@ -345,9 +308,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Displays the fewest time taken to solve the 8-puzzle.
-     */
     private fun displayFastestTime() {
         binding.tvFastestTime.text = if (fastestTime == DEFAULT_FASTEST_TIME) {
             getString(R.string.default_timer)
@@ -356,10 +316,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Removes the statistics displayed (replacing them with hyphen placeholders) when the solution
-     * walkthrough is played.
-     */
     private fun blankDisplayedStats() {
         /* Remove the statistics for the number of moves, and display them. */
         numMoves = 0
@@ -370,10 +326,6 @@ class MainActivity : AppCompatActivity() {
         binding.tvTimeTaken.text = getString(R.string.default_timer)
     }
 
-    /**
-     * Resets the statistics displayed (setting their values to 0) at the start of a game (that is,
-     * immediately after the shuffling animation finishes).
-     */
     private fun resetDisplayedStats() {
         /* Reset the statistics for the number of moves, and display them. */
         numMoves = 0
@@ -387,17 +339,10 @@ class MainActivity : AppCompatActivity() {
     /**********************************
      * Methods Related to Puzzle Grid *
      **********************************/
-
-    /**
-     * Sets the distance in pixels a touch can wander before it is registered as a fling gesture.
-     */
     private fun setTouchSlopThreshold() {
         binding.gvgPuzzle.setTouchSlopThreshold(ViewConfiguration.get(this).scaledTouchSlop)
     }
 
-    /**
-     * Sets the listener for responding to detected fling gestures.
-     */
     private fun setOnFlingListener() {
         binding.gvgPuzzle.setFlingListener(object : OnFlingListener {
             override fun onFling(direction: FlingDirection, position: Int) {
@@ -406,9 +351,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    /**
-     * Sets the dimensions of the puzzle grid and its individual tiles.
-     */
     private fun setDimensions() {
         binding.gvgPuzzle.viewTreeObserver.addOnGlobalLayoutListener(object :
             ViewTreeObserver.OnGlobalLayoutListener {
@@ -438,11 +380,6 @@ class MainActivity : AppCompatActivity() {
     /********************************************
      * Methods Related to Puzzle Image and Grid *
      ********************************************/
-
-    /**
-     * Sets the puzzle image to the most recently selected image (persists even when the app is closed)
-     * and resizes (crops) it to fit the dimensions of the puzzle grid.
-     */
     private fun initPuzzleImage() {
         /* Retrieve the most recently displayed puzzle image. */
         puzzleImageIndex = sp.getInt(Key.KEY_PUZZLE_IMAGE.name, 0)
@@ -458,9 +395,6 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    /**
-     * Sets the image chunks displayed on the individual puzzle tiles.
-     */
     private fun initChunks() {
         /* Store copies of the tiles, alongside versions with dark filter applied (blank tiles). */
         imageChunks =
@@ -479,10 +413,6 @@ class MainActivity : AppCompatActivity() {
             ).second
     }
 
-    /**
-     * Displays the puzzle grid, with the correct tile images (8 tiles with no filter applied
-     * and 1 tile with a dark color filter applied to designate it as the blank tile).
-     */
     private fun displayPuzzle() {
         /*
          * Once this loop finished executing, there should be 9 distinct image chunks:
@@ -505,11 +435,6 @@ class MainActivity : AppCompatActivity() {
         binding.gvgPuzzle.adapter = TileAdapter(tileImages, tileDimen, tileDimen)
     }
 
-    /**
-     * Display the puzzle grid with all 9 tiles having a dark color filter applied.
-     *
-     * This method is invoked at the start of the shuffling animation.
-     */
     private fun displayBlankPuzzle() {
         /*
          * Once this loop finished executing, there should be 9 image chunks, all of which have
@@ -529,10 +454,6 @@ class MainActivity : AppCompatActivity() {
         binding.gvgPuzzle.adapter = TileAdapter(tileImages, tileDimen, tileDimen)
     }
 
-    /**
-     * Loads and displays the puzzle grid, with the correct tile images (8 tiles with no filter applied
-     * and 1 tile with a dark color filter applied to designate it as the blank tile).
-     */
     private fun loadPuzzle(position: Int) {
         /*
          * Handle the case when the spinner is clicked while the success message is still
@@ -546,11 +467,6 @@ class MainActivity : AppCompatActivity() {
         displayPuzzle()
     }
 
-    /**
-     * Updates the puzzle image displayed on the grid when a new image is chosen via the spinner.
-     *
-     * @param position Position of the selected puzzle image in the spinner adapter.
-     */
     private fun updatePuzzleImage(position: Int) {
         puzzleImageIndex = position
 
@@ -572,13 +488,6 @@ class MainActivity : AppCompatActivity() {
     /***********************************
      * Methods Related to Moving Tiles *
      ***********************************/
-
-    /**
-     * Moves the specified tile in the given direction of the user's fling gesture.
-     *
-     * @param direction Direction of the user's fling gesture.
-     * @param position Position of the tile to be moved (zero-based, following row-major order).
-     */
     private fun moveTile(direction: FlingDirection, position: Int) {
         /* Use a flag to keep track of whether the success message can be removed. */
         var flag = false
@@ -611,10 +520,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Updates the game status depending on whether user solves the puzzle
-     * or opts to play the solution walkthrough instead.
-     */
     private fun updateGameStatus(): Boolean {
         if (isGameInSession) {
             trackMove()
@@ -644,18 +549,11 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    /**
-     * Updates and displays the number of movies every time a user moves a tile.
-     */
     private fun trackMove() {
         numMoves++
         binding.tvMoveNumber.text = numMoves.toString()
     }
 
-    /**
-     * Launches and starts the timer when a game in session, updating its display every second
-     * until halted when the game ends.
-     */
     private fun launchTimer() {
         isTimerRunning = true
 
@@ -674,10 +572,6 @@ class MainActivity : AppCompatActivity() {
     /********************************
      * Methods Related to Shuffling *
      ********************************/
-
-    /**
-     * Handles the back-end and front-end operations when the puzzle tiles are shuffled.
-     */
     private fun shuffle() {
         /* Display the progress bar, and update the message displayed */
         binding.pbShuffle.visibility = View.VISIBLE
@@ -709,12 +603,6 @@ class MainActivity : AppCompatActivity() {
         startShowingTiles()
     }
 
-    /**
-     * Generates a valid shuffling of the puzzle tiles.
-     *
-     * A shuffling is considered valid if the resulting state is not equivalent to the goal
-     * state and if it is solvable (that is, it has an even number of inversions).
-     */
     private fun getValidShuffledState() {
         val shuffledState: StatePair =
             ShuffleUtil.getValidShuffledState(puzzleState, goalPuzzleState, BLANK_TILE_MARKER)
@@ -723,10 +611,6 @@ class MainActivity : AppCompatActivity() {
         blankTilePos = shuffledState.blankTilePos
     }
 
-    /**
-     * Updates the components depending on whether the shuffling animation is halfway finished
-     * or fully completed.
-     */
     private fun updateComponents() {
         when (binding.pbShuffle.progress) {
             (NUM_TILES - 1) / 2 -> halfwayShuffling()
@@ -734,16 +618,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Updates the components when the shuffling animation is halfway finished.
-     */
     private fun halfwayShuffling() {
         binding.btnShuffle.text = getString(R.string.inversions)
     }
 
-    /**
-     * Updates the components when the shuffling animation is fully completed.
-     */
     private fun finishShuffling() {
         /* Signal the start of a new game. */
         isGameInSession = true
@@ -758,21 +636,18 @@ class MainActivity : AppCompatActivity() {
                 R.color.btn_first_variant
             )
         )
-
         binding.btnUpload.setBackgroundColor(
             ContextCompat.getColor(
                 applicationContext,
                 R.color.btn_second_variant
             )
         )
-
         binding.btnShuffle.setBackgroundColor(
             ContextCompat.getColor(
                 applicationContext,
                 R.color.btn_first_variant
             )
         )
-
         binding.btnShuffle.text = getString(R.string.randomized)
 
         /* Remove the progress bar and trivia, and re-enable interaction with UI elements. */
@@ -781,29 +656,17 @@ class MainActivity : AppCompatActivity() {
         enableClickables()
     }
 
-    /**
-     * Disables all the clickable components.
-     */
     private fun disableClickables() {
         isPuzzleGridFrozen = true
         binding.btnShuffle.isEnabled = false
         binding.spnPuzzle.isEnabled = false
     }
 
-    /**
-     * Enables all the clickable components.
-     */
     private fun enableClickables() {
         isPuzzleGridFrozen = false
         binding.btnShuffle.isEnabled = true
     }
 
-    /**
-     * Removes the dark color filter on the specified tile as part of the shuffling animation.
-     *
-     * @param position Position of the tile whose filter is to be removed (zero-based, following
-     * row-major order).
-     */
     private fun showTileAt(position: Int) {
         tileImages[position].setImageBitmap(imageChunks[puzzleState[position]])
 
@@ -811,10 +674,6 @@ class MainActivity : AppCompatActivity() {
         binding.gvgPuzzle.adapter = TileAdapter(tileImages, tileDimen, tileDimen)
     }
 
-    /**
-     * Removes the dark color filter on the eight non-blank tiles at random intervals
-     * as part of the shuffling animation.
-     */
     private fun startShowingTiles() {
         /* Concurrently show the tiles with randomized delay and order of appearance. */
         for (position in 0 until tileImages.size) {
@@ -832,9 +691,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /***************************************
-     * Methods Related to Solution Display *
-     ***************************************/
+    /*********************************************************
+     * Methods Related to Solution Display With A* Algorithm *
+     *********************************************************/
 
     /**
      * Handles the back-end and front-end operations when the user opts to display the solution
@@ -856,9 +715,6 @@ class MainActivity : AppCompatActivity() {
         endGame(SolveStatus.COMPUTER_SOLVED)
     }
 
-    /**
-     * Displays the solution found by the app via the A* algorithm implemented in <code>SolveUtil</code>.
-     */
     private fun displaySolution() {
         startSolution()
 
@@ -868,12 +724,6 @@ class MainActivity : AppCompatActivity() {
         animateSolution()
     }
 
-    /**
-     * Updates the display depending on whether the solution walkthrough is paused or resumed.
-     *
-     * This solution refers to the one found by the app via the A* algorithm implemented in
-     * <code>SolveUtil</code>.
-     */
     private fun controlSolutionDisplay() {
         if (isSolutionPlay) {
             pauseSolution()
@@ -882,24 +732,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Invoked when the solution walkthrough starts.
-     *
-     * This solution refers to the one found by the app via the A* algorithm implemented in
-     * <code>SolveUtil</code>.
-     */
     private fun startSolution() {
         isSolutionDisplay = true
         isSolutionPlay = true
         isPuzzleGridFrozen = true
     }
 
-    /**
-     * Handles the animation of the puzzle tiles during the solution walkthrough.
-     *
-     * This solution refers to the one found by the app via the A* algorithm implemented in
-     * <code>SolveUtil</code>.
-     */
     private fun animateSolution() {
         Handler(Looper.getMainLooper()).postDelayed({
             solveDisplayHandler.post(object : Runnable {
@@ -937,12 +775,6 @@ class MainActivity : AppCompatActivity() {
         }, AnimationUtil.FIRST_MOVE_SOLUTION_DELAY.toLong())
     }
 
-    /**
-     * Invoked when the solution walkthrough finishes.
-     *
-     * This solution refers to the one found by the app via the A* algorithm implemented in
-     * <code>SolveUtil</code>.
-     */
     private fun endSolution() {
         isSolutionDisplay = false
         isSolutionPlay = false
@@ -950,23 +782,11 @@ class MainActivity : AppCompatActivity() {
         isSolutionSkip = false
     }
 
-    /**
-     * Pauses the solution walkthrough.
-     *
-     * This solution refers to the one found by the app via the A* algorithm implemented in
-     * <code>SolveUtil</code>.
-     */
     private fun pauseSolution() {
         isSolutionPlay = false
         binding.btnShuffle.text = getString(R.string.resume)
     }
 
-    /**
-     * Resumes playing the solution walkthrough.
-     *
-     * This solution refers to the one found by the app via the A* algorithm implemented in
-     * <code>SolveUtil</code>.
-     */
     private fun resumeSolution() {
         isSolutionPlay = true
         binding.btnShuffle.text = getString(R.string.pause)
@@ -974,12 +794,6 @@ class MainActivity : AppCompatActivity() {
         animateSolution()
     }
 
-    /**
-     * Skips the solution walkthrough.
-     *
-     * This solution refers to the one found by the app via the A* algorithm implemented in
-     * <code>SolveUtil</code>.
-     */
     private fun skipSolution() {
         isSolutionSkip = true
         resumeSolution()
@@ -988,15 +802,6 @@ class MainActivity : AppCompatActivity() {
     /*********************
      * Post-Game Methods *
      *********************/
-
-    /**
-     * Ends the game that is currently in session, in effect stopping the timer, displaying the
-     * pertinent success message, and resetting the variables in preparation for a new game
-     * if the user was able to solve the puzzle or for displaying the solution, otherwise.
-     *
-     * @param solveStatus Game status depending on whether the user solves the puzzle or opts
-     * to play the solution walkthrough instead.
-     */
     private fun endGame(solveStatus: SolveStatus) {
         /* Signal that the game is over. */
         isGameInSession = false
@@ -1012,57 +817,37 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Handles the back-end and front-end operations in preparation for a new game.
-     */
     private fun prepareForNewGame() {
-        /*
-         * Revert the colors of the game title and the buttons, as well as the text displayed,
-         * to visually indicate the start of a new game.
-         */
+        // Change UI
         binding.tvTitle.setTextColor(ContextCompat.getColor(applicationContext, R.color.btn_first))
-
         binding.btnUpload.setBackgroundColor(
             ContextCompat.getColor(
                 applicationContext,
                 R.color.btn_second
             )
         )
-
         binding.btnShuffle.setBackgroundColor(
             ContextCompat.getColor(
                 applicationContext,
                 R.color.btn_first
             )
         )
-
         binding.btnShuffle.text = getString(R.string.new_game)
 
         /* Revert the visibility of the upload button (instead of the trivia). */
         binding.btnUpload.visibility = View.VISIBLE
         binding.btnUpload.text = getString(R.string.upload_picture)
         binding.tvTrivia.visibility = View.GONE
-
         binding.spnPuzzle.isEnabled = true
     }
 
-    /**
-     * Updates the components in preparation for showing the solution found by the app via the
-     * A* algorithm implemented in <code>SolveUtil</code>.
-     */
     private fun prepareForSolution() {
         binding.btnShuffle.text = getString(R.string.pause)
-
         binding.btnUpload.visibility = View.VISIBLE
         binding.btnUpload.text = getString(R.string.skip)
         binding.tvTrivia.visibility = View.GONE
     }
 
-    /**
-     * Updates the saved statistics (namely the fewest number of moves and fastest time taken to
-     * solve the puzzle) at the end of a game provided that the user has set a new record for these
-     * statistics.
-     */
     private fun saveStats(solveStatus: SolveStatus) {
         when (solveStatus) {
             SolveStatus.FEWEST_MOVES -> saveFewestMoves()
@@ -1072,10 +857,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Updates the saved fewest number of moves and fastest time taken to solve the puzzle
-     * by storing the new values in the shared preferences file.
-     */
     private fun saveFewestAndFastest() {
         fewestMoves = numMoves
         binding.tvFewestMoves.text = fewestMoves.toString()
@@ -1094,10 +875,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Updates the saved fewest number of moves taken to solve the puzzle by storing the new values
-     * in the shared preferences file.
-     */
     private fun saveFewestMoves() {
         fewestMoves = numMoves
         binding.tvFewestMoves.text = fewestMoves.toString()
@@ -1112,10 +889,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Updates the saved fastest time taken to solve the puzzle by storing the new values
-     * in the shared preferences file.
-     */
     private fun saveFastestTime() {
         fastestTime = timeTaken
         binding.tvFastestTime.text = TimeUtil.displayTime(fastestTime)
@@ -1130,13 +903,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Displays the pertinent success message based on the game status, which, in turn, depends
-     * on whether the user solves the puzzle or opts to play the solution walkthrough instead.
-     *
-     * @param solveStatus Game status depending on whether the user solves the puzzle or opts
-     * to play the solution walkthrough instead.
-     */
     private fun displaySuccessMessage(solveStatus: SolveStatus) {
         /* Display a message depending on how the goal state of the puzzle was reached. */
         binding.tvSuccess.visibility = View.VISIBLE
@@ -1162,20 +928,10 @@ class MainActivity : AppCompatActivity() {
     /***********************************************
      * Methods Related to Uploading a Puzzle Image *
      ***********************************************/
-
-    /**
-     * Obtains the necessary permission for choosing a photo from the Gallery as the puzzle image.
-     */
     private fun uploadPuzzleImage() {
         UploadUtil.chooseFromGallery(this, galleryLauncher)
     }
 
-    /**
-     * Sets the puzzle image to the photo chosen from the Gallery and performs the necessary
-     * bitmap manipulations to update the display on the puzzle grid.
-     *
-     * @param imagePath URI to the Gallery photo that will be set as the puzzle image.
-     */
     private fun loadPuzzle(imagePath: Uri?) {
         isGalleryImageChosen = true
         resetState()
@@ -1191,11 +947,6 @@ class MainActivity : AppCompatActivity() {
         displayPuzzle()
     }
 
-    /**
-     * Sets the puzzle image to the photo chosen from the Gallery
-     *
-     * @param imagePath URI to the Gallery photo that will be set as the puzzle image.
-     */
     private fun updatePuzzleImage(imagePath: Uri?) {
         puzzleImage = ImageUtil.resizeToSquareBitmap(
             BitmapFactory.decodeStream(
@@ -1206,16 +957,9 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    /**
-     * Callback for the result from requesting permissions.
-     *
-     * @param requestCode The request code passed in <code>
-     *     ActivityCompat.requestPermissions(android.app.Activity, String[], int)</code>.
-     * @param permissions The requested permissions. Never null.
-     * @param grantResults The grant results for the corresponding permissions which is either <code>
-     *     PackageManager.PERMISSION_GRANTED</code> or <code>PackageManager.PERMISSION_DENIED</code>.
-     *     Never null.
-     */
+    /**************************
+     * Requesting permissions *
+     **************************/
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>,
         grantResults: IntArray
@@ -1224,43 +968,15 @@ class MainActivity : AppCompatActivity() {
         permissionsResult(grantResults)
     }
 
-    /**
-     * Defines the behavior related to choosing an image from the Gallery based on the permissions
-     * granted by the user.
-     *
-     * @param grantResults The grant results for the corresponding permissions which is either <code>
-     *     PackageManager.PERMISSION_GRANTED</code> or <code>PackageManager.PERMISSION_DENIED</code>.
-     *     Never null.
-     */
     private fun permissionsResult(grantResults: IntArray) {
         UploadUtil.permissionsResultGallery(grantResults, this@MainActivity, galleryLauncher)
     }
 
     companion object {
-        /**
-         * Number of columns in the 8-puzzle grid.
-         */
         private const val NUM_COLUMNS = 3
-
-        /**
-         * Number of tiles in the 8-puzzle grid.
-         */
         private const val NUM_TILES = NUM_COLUMNS * NUM_COLUMNS
-
-        /**
-         * Thickness of the tile border (in pixels).
-         */
         private const val BORDER_OFFSET = 6
-
-        /**
-         * Indicator that the tile is blank.
-         */
         private const val BLANK_TILE_MARKER = NUM_TILES - 1
-
-        /**
-         * Default value for the fewest number of moves and fastes time,
-         * its initial value before the user starts playing their first game.
-         */
         private const val DEFAULT_FEWEST_MOVES = Long.MAX_VALUE
         private const val DEFAULT_FASTEST_TIME = Long.MAX_VALUE
     }
