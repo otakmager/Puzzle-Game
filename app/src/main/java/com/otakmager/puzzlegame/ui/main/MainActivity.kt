@@ -41,23 +41,6 @@ import kotlin.collections.ArrayList
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    /***************************
-     * View-Related Properties *
-     ***************************/
-    private lateinit var clRoot: ConstraintLayout
-    private lateinit var gvgPuzzle: GridViewGesture
-    private lateinit var btnUpload: Button
-    private lateinit var btnShuffle: Button
-    private lateinit var pbShuffle: ProgressBar
-    private lateinit var tvMoveNumber: TextView
-    private lateinit var tvFewestMoves: TextView
-    private lateinit var tvTimeTaken: TextView
-    private lateinit var tvFastestTime: TextView
-    private lateinit var spnPuzzle: Spinner
-    private lateinit var tvTitle: TextView
-    private lateinit var tvSuccess: TextView
-    private lateinit var tvTrivia: TextView
-
     /***************
      * Shared Preferences to save data in local *
      **************/
@@ -142,42 +125,17 @@ class MainActivity : AppCompatActivity() {
         if (isGalleryImageChosen) {
             isGalleryImageChosen = false
         } else {
-            spnPuzzle.setSelection(puzzleImageIndex)
+            binding.spnPuzzle.setSelection(puzzleImageIndex)
         }
     }
 
     private fun initComponents() {
-        /* Initialize the root layout and the grid view. */
-        clRoot = findViewById(R.id.cl_root)
-        gvgPuzzle = findViewById(R.id.gvg_puzzle)
-
-        /* Initialize the buttons. */
-        btnShuffle = findViewById(R.id.btn_shuffle)
         setBtnShuffleAction()
-
-        btnUpload = findViewById(R.id.btn_upload)
         setBtnUploadAction()
-
-        /* Initialize the progress bar. */
-        pbShuffle = findViewById(R.id.pb_shuffle)
-
-        /* Initialize the text views. */
-        tvMoveNumber = findViewById(R.id.tv_move_number)
-        tvFewestMoves = findViewById(R.id.tv_fewest_moves)
-        tvTimeTaken = findViewById(R.id.tv_time_taken)
-        tvFastestTime = findViewById(R.id.tv_fastest_time)
-
-        tvTitle = findViewById(R.id.tv_title)
-        tvSuccess = findViewById(R.id.tv_success)
-        tvSuccess.setOnClickListener {
-            tvSuccess.visibility = View.GONE
+        binding.tvSuccess.setOnClickListener {
+            binding.tvSuccess.visibility = View.GONE
         }
-
-        tvTrivia = findViewById(R.id.tv_trivia)
-
-        /* Initialize the puzzle spinner and its adapter. */
-        spnPuzzle = findViewById(R.id.spn_puzzle)
-        spnPuzzle.adapter = SpinnerAdapter(
+        binding.spnPuzzle.adapter = SpinnerAdapter(
             this,
             R.layout.spn_puzzle_item,
             resources.getStringArray(R.array.puzzle_images)
@@ -218,7 +176,7 @@ class MainActivity : AppCompatActivity() {
 
                 /* Animate UI elements while shuffling. */
                 showTileAt(message.data.getInt(Key.KEY_TILE_POSITION.name))
-                pbShuffle.progress = message.data.getInt(Key.KEY_PROGRESS.name)
+                binding.pbShuffle.progress = message.data.getInt(Key.KEY_PROGRESS.name)
                 updateComponents()
             }
         }
@@ -290,7 +248,7 @@ class MainActivity : AppCompatActivity() {
      * in session) or displaying the solution (if the game is already in session).
      */
     private fun setBtnShuffleAction() {
-        btnShuffle.setOnClickListener {
+        binding.btnShuffle.setOnClickListener {
             if (isSolutionDisplay) {
                 controlSolutionDisplay()
             } else if (!isGameInSession) {
@@ -307,12 +265,12 @@ class MainActivity : AppCompatActivity() {
      * walkthrough is currently being played).
      */
     private fun setBtnUploadAction() {
-        btnUpload.setOnClickListener {
+        binding.btnUpload.setOnClickListener {
             if (isSolutionDisplay) {
                 skipSolution()
             } else {
-                if (spnPuzzle.selectedItemPosition != indexOfCustom) {
-                    spnPuzzle.setSelection(indexOfCustom)
+                if (binding.spnPuzzle.selectedItemPosition != indexOfCustom) {
+                    binding.spnPuzzle.setSelection(indexOfCustom)
                 } else {
                     uploadPuzzleImage()
                 }
@@ -324,7 +282,7 @@ class MainActivity : AppCompatActivity() {
      * Sets the item selection event listener for the spinner.
      */
     private fun setSpnPuzzleAction() {
-        spnPuzzle.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.spnPuzzle.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             /**
              * Callback method to be invoked when an item in this view has been
              * selected. This callback is invoked only when the newly selected
@@ -380,7 +338,7 @@ class MainActivity : AppCompatActivity() {
      * Displays the fewest number of moves taken to solve the 8-puzzle.
      */
     private fun displayFewestMoves() {
-        tvFewestMoves.text = if (fewestMoves == DEFAULT_FEWEST_MOVES) {
+        binding.tvFewestMoves.text = if (fewestMoves == DEFAULT_FEWEST_MOVES) {
             getString(R.string.default_move_count)
         } else {
             fewestMoves.toString()
@@ -391,7 +349,7 @@ class MainActivity : AppCompatActivity() {
      * Displays the fewest time taken to solve the 8-puzzle.
      */
     private fun displayFastestTime() {
-        tvFastestTime.text = if (fastestTime == DEFAULT_FASTEST_TIME) {
+        binding.tvFastestTime.text = if (fastestTime == DEFAULT_FASTEST_TIME) {
             getString(R.string.default_timer)
         } else {
             TimeUtil.displayTime(fastestTime)
@@ -405,11 +363,11 @@ class MainActivity : AppCompatActivity() {
     private fun blankDisplayedStats() {
         /* Remove the statistics for the number of moves, and display them. */
         numMoves = 0
-        tvMoveNumber.text = getString(R.string.default_move_count)
+        binding.tvMoveNumber.text = getString(R.string.default_move_count)
 
         /* Remove the statistics for the time taken, and display them. */
         timeTaken = 0
-        tvTimeTaken.text = getString(R.string.default_timer)
+        binding.tvTimeTaken.text = getString(R.string.default_timer)
     }
 
     /**
@@ -419,11 +377,11 @@ class MainActivity : AppCompatActivity() {
     private fun resetDisplayedStats() {
         /* Reset the statistics for the number of moves, and display them. */
         numMoves = 0
-        tvMoveNumber.text = numMoves.toString()
+        binding.tvMoveNumber.text = numMoves.toString()
 
         /* Reset the statistics for the time taken, and display them. */
         timeTaken = 0
-        tvTimeTaken.text = TimeUtil.displayTime(timeTaken)
+        binding.tvTimeTaken.text = TimeUtil.displayTime(timeTaken)
     }
 
     /**********************************
@@ -434,14 +392,14 @@ class MainActivity : AppCompatActivity() {
      * Sets the distance in pixels a touch can wander before it is registered as a fling gesture.
      */
     private fun setTouchSlopThreshold() {
-        gvgPuzzle.setTouchSlopThreshold(ViewConfiguration.get(this).scaledTouchSlop)
+        binding.gvgPuzzle.setTouchSlopThreshold(ViewConfiguration.get(this).scaledTouchSlop)
     }
 
     /**
      * Sets the listener for responding to detected fling gestures.
      */
     private fun setOnFlingListener() {
-        gvgPuzzle.setFlingListener(object : OnFlingListener {
+        binding.gvgPuzzle.setFlingListener(object : OnFlingListener {
             override fun onFling(direction: FlingDirection, position: Int) {
                 moveTile(direction, position)
             }
@@ -452,13 +410,13 @@ class MainActivity : AppCompatActivity() {
      * Sets the dimensions of the puzzle grid and its individual tiles.
      */
     private fun setDimensions() {
-        gvgPuzzle.viewTreeObserver.addOnGlobalLayoutListener(object :
+        binding.gvgPuzzle.viewTreeObserver.addOnGlobalLayoutListener(object :
             ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
-                gvgPuzzle.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                binding.gvgPuzzle.viewTreeObserver.removeOnGlobalLayoutListener(this)
 
                 /* Calculate the side length of each square tile. */
-                puzzleDimen = gvgPuzzle.measuredWidth
+                puzzleDimen = binding.gvgPuzzle.measuredWidth
                 tileDimen = puzzleDimen / NUM_COLUMNS
 
                 /*
@@ -488,7 +446,7 @@ class MainActivity : AppCompatActivity() {
     private fun initPuzzleImage() {
         /* Retrieve the most recently displayed puzzle image. */
         puzzleImageIndex = sp.getInt(Key.KEY_PUZZLE_IMAGE.name, 0)
-        spnPuzzle.setSelection(puzzleImageIndex)
+        binding.spnPuzzle.setSelection(puzzleImageIndex)
 
         puzzleImage = ImageUtil.resizeToSquareBitmap(
             ImageUtil.drawableToBitmap(
@@ -544,7 +502,7 @@ class MainActivity : AppCompatActivity() {
          * This data should persist even after the app is closed so that the same image is displayed
          * on the next startup.
          */
-        gvgPuzzle.adapter = TileAdapter(tileImages, tileDimen, tileDimen)
+        binding.gvgPuzzle.adapter = TileAdapter(tileImages, tileDimen, tileDimen)
     }
 
     /**
@@ -568,7 +526,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         /* Set (or reset) the adapter of the grid view. */
-        gvgPuzzle.adapter = TileAdapter(tileImages, tileDimen, tileDimen)
+        binding.gvgPuzzle.adapter = TileAdapter(tileImages, tileDimen, tileDimen)
     }
 
     /**
@@ -580,7 +538,7 @@ class MainActivity : AppCompatActivity() {
          * Handle the case when the spinner is clicked while the success message is still
          * on display.
          */
-        tvSuccess.visibility = View.GONE
+        binding.tvSuccess.visibility = View.GONE
         resetState()
 
         updatePuzzleImage(position)
@@ -648,7 +606,7 @@ class MainActivity : AppCompatActivity() {
              * after completing a game.
              */
             if (!flag) {
-                tvSuccess.visibility = View.GONE
+                binding.tvSuccess.visibility = View.GONE
             }
         }
     }
@@ -691,7 +649,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun trackMove() {
         numMoves++
-        tvMoveNumber.text = numMoves.toString()
+        binding.tvMoveNumber.text = numMoves.toString()
     }
 
     /**
@@ -704,7 +662,7 @@ class MainActivity : AppCompatActivity() {
         timerHandler.post(object : Runnable {
             override fun run() {
                 if (isTimerRunning) {
-                    tvTimeTaken.text = TimeUtil.displayTime(timeTaken++)
+                    binding.tvTimeTaken.text = TimeUtil.displayTime(timeTaken++)
                     timerHandler.postDelayed(this, TimeUtil.SECONDS_TO_MILLISECONDS.toLong())
                 } else {
                     timerHandler.removeCallbacks(this)
@@ -722,20 +680,20 @@ class MainActivity : AppCompatActivity() {
      */
     private fun shuffle() {
         /* Display the progress bar, and update the message displayed */
-        pbShuffle.visibility = View.VISIBLE
-        pbShuffle.progress = 0
-        btnShuffle.text = getString(R.string.randomizing)
+        binding.pbShuffle.visibility = View.VISIBLE
+        binding.pbShuffle.progress = 0
+        binding.btnShuffle.text = getString(R.string.randomizing)
 
         /* Display trivia in place of the upload button. */
-        btnUpload.visibility = View.INVISIBLE
-        tvTrivia.visibility = View.VISIBLE
-        tvTrivia.text = getString(R.string.trivia)
+        binding.btnUpload.visibility = View.INVISIBLE
+        binding.tvTrivia.visibility = View.VISIBLE
+        binding.tvTrivia.text = getString(R.string.trivia)
 
         /*
          * Handle the case when the shuffle button is clicked while the success message
          * is still on display.
          */
-        tvSuccess.visibility = View.GONE
+        binding.tvSuccess.visibility = View.GONE
 
         /* During shuffling, no UI element should be clickable. */
         disableClickables()
@@ -770,7 +728,7 @@ class MainActivity : AppCompatActivity() {
      * or fully completed.
      */
     private fun updateComponents() {
-        when (pbShuffle.progress) {
+        when (binding.pbShuffle.progress) {
             (NUM_TILES - 1) / 2 -> halfwayShuffling()
             (NUM_TILES - 1) -> finishShuffling()
         }
@@ -780,7 +738,7 @@ class MainActivity : AppCompatActivity() {
      * Updates the components when the shuffling animation is halfway finished.
      */
     private fun halfwayShuffling() {
-        btnShuffle.text = getString(R.string.inversions)
+        binding.btnShuffle.text = getString(R.string.inversions)
     }
 
     /**
@@ -794,32 +752,32 @@ class MainActivity : AppCompatActivity() {
          * Change the colors of the game title and the buttons, as well as the text displayed,
          * to visually indicate that shuffling is finished.
          */
-        tvTitle.setTextColor(
+        binding.tvTitle.setTextColor(
             ContextCompat.getColor(
                 applicationContext,
                 R.color.btn_first_variant
             )
         )
 
-        btnUpload.setBackgroundColor(
+        binding.btnUpload.setBackgroundColor(
             ContextCompat.getColor(
                 applicationContext,
                 R.color.btn_second_variant
             )
         )
 
-        btnShuffle.setBackgroundColor(
+        binding.btnShuffle.setBackgroundColor(
             ContextCompat.getColor(
                 applicationContext,
                 R.color.btn_first_variant
             )
         )
 
-        btnShuffle.text = getString(R.string.randomized)
+        binding.btnShuffle.text = getString(R.string.randomized)
 
         /* Remove the progress bar and trivia, and re-enable interaction with UI elements. */
-        pbShuffle.visibility = View.GONE
-        tvTrivia.text = getString(R.string.trivia_a_star)
+        binding.pbShuffle.visibility = View.GONE
+        binding.tvTrivia.text = getString(R.string.trivia_a_star)
         enableClickables()
     }
 
@@ -828,8 +786,8 @@ class MainActivity : AppCompatActivity() {
      */
     private fun disableClickables() {
         isPuzzleGridFrozen = true
-        btnShuffle.isEnabled = false
-        spnPuzzle.isEnabled = false
+        binding.btnShuffle.isEnabled = false
+        binding.spnPuzzle.isEnabled = false
     }
 
     /**
@@ -837,7 +795,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun enableClickables() {
         isPuzzleGridFrozen = false
-        btnShuffle.isEnabled = true
+        binding.btnShuffle.isEnabled = true
     }
 
     /**
@@ -850,7 +808,7 @@ class MainActivity : AppCompatActivity() {
         tileImages[position].setImageBitmap(imageChunks[puzzleState[position]])
 
         /* Set (or reset) the adapter of the grid view. */
-        gvgPuzzle.adapter = TileAdapter(tileImages, tileDimen, tileDimen)
+        binding.gvgPuzzle.adapter = TileAdapter(tileImages, tileDimen, tileDimen)
     }
 
     /**
@@ -1000,7 +958,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun pauseSolution() {
         isSolutionPlay = false
-        btnShuffle.text = getString(R.string.resume)
+        binding.btnShuffle.text = getString(R.string.resume)
     }
 
     /**
@@ -1011,7 +969,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun resumeSolution() {
         isSolutionPlay = true
-        btnShuffle.text = getString(R.string.pause)
+        binding.btnShuffle.text = getString(R.string.pause)
 
         animateSolution()
     }
@@ -1062,30 +1020,30 @@ class MainActivity : AppCompatActivity() {
          * Revert the colors of the game title and the buttons, as well as the text displayed,
          * to visually indicate the start of a new game.
          */
-        tvTitle.setTextColor(ContextCompat.getColor(applicationContext, R.color.btn_first))
+        binding.tvTitle.setTextColor(ContextCompat.getColor(applicationContext, R.color.btn_first))
 
-        btnUpload.setBackgroundColor(
+        binding.btnUpload.setBackgroundColor(
             ContextCompat.getColor(
                 applicationContext,
                 R.color.btn_second
             )
         )
 
-        btnShuffle.setBackgroundColor(
+        binding.btnShuffle.setBackgroundColor(
             ContextCompat.getColor(
                 applicationContext,
                 R.color.btn_first
             )
         )
 
-        btnShuffle.text = getString(R.string.new_game)
+        binding.btnShuffle.text = getString(R.string.new_game)
 
         /* Revert the visibility of the upload button (instead of the trivia). */
-        btnUpload.visibility = View.VISIBLE
-        btnUpload.text = getString(R.string.upload_picture)
-        tvTrivia.visibility = View.GONE
+        binding.btnUpload.visibility = View.VISIBLE
+        binding.btnUpload.text = getString(R.string.upload_picture)
+        binding.tvTrivia.visibility = View.GONE
 
-        spnPuzzle.isEnabled = true
+        binding.spnPuzzle.isEnabled = true
     }
 
     /**
@@ -1093,11 +1051,11 @@ class MainActivity : AppCompatActivity() {
      * A* algorithm implemented in <code>SolveUtil</code>.
      */
     private fun prepareForSolution() {
-        btnShuffle.text = getString(R.string.pause)
+        binding.btnShuffle.text = getString(R.string.pause)
 
-        btnUpload.visibility = View.VISIBLE
-        btnUpload.text = getString(R.string.skip)
-        tvTrivia.visibility = View.GONE
+        binding.btnUpload.visibility = View.VISIBLE
+        binding.btnUpload.text = getString(R.string.skip)
+        binding.tvTrivia.visibility = View.GONE
     }
 
     /**
@@ -1120,10 +1078,10 @@ class MainActivity : AppCompatActivity() {
      */
     private fun saveFewestAndFastest() {
         fewestMoves = numMoves
-        tvFewestMoves.text = fewestMoves.toString()
+        binding.tvFewestMoves.text = fewestMoves.toString()
 
         fastestTime = timeTaken
-        tvFastestTime.text = TimeUtil.displayTime(fastestTime)
+        binding.tvFastestTime.text = TimeUtil.displayTime(fastestTime)
 
         /*
          * Store in the shared preferences file.
@@ -1142,7 +1100,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun saveFewestMoves() {
         fewestMoves = numMoves
-        tvFewestMoves.text = fewestMoves.toString()
+        binding.tvFewestMoves.text = fewestMoves.toString()
 
         /*
          * Store in the shared preferences file.
@@ -1160,7 +1118,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun saveFastestTime() {
         fastestTime = timeTaken
-        tvFastestTime.text = TimeUtil.displayTime(fastestTime)
+        binding.tvFastestTime.text = TimeUtil.displayTime(fastestTime)
 
         /*
          * Store in the shared preferences file.
@@ -1181,23 +1139,23 @@ class MainActivity : AppCompatActivity() {
      */
     private fun displaySuccessMessage(solveStatus: SolveStatus) {
         /* Display a message depending on how the goal state of the puzzle was reached. */
-        tvSuccess.visibility = View.VISIBLE
-        tvSuccess.text = getString(solveStatus.successMessageId)
+        binding.tvSuccess.visibility = View.VISIBLE
+        binding.tvSuccess.text = getString(solveStatus.successMessageId)
 
         if (solveStatus == SolveStatus.COMPUTER_SOLVED) {
-            var message = "$numMovesSolution ${tvSuccess.text}"
+            var message = "$numMovesSolution ${binding.tvSuccess.text}"
 
             /* Display "1 Move" instead of "1 Moves". */
             if (numMovesSolution == 1) {
                 message = message.substring(0, message.length - 1)
             }
 
-            tvSuccess.text = message
+            binding.tvSuccess.text = message
         }
 
         /* Hide the success message after a set number of seconds. */
         Handler(Looper.getMainLooper()).postDelayed({
-            tvSuccess.visibility = View.GONE
+            binding.tvSuccess.visibility = View.GONE
         }, AnimationUtil.SUCCESS_DISPLAY.toLong())
     }
 
@@ -1226,7 +1184,7 @@ class MainActivity : AppCompatActivity() {
          * Handle the case when the spinner is clicked while the success message is still
          * on display.
          */
-        tvSuccess.visibility = View.GONE
+        binding.tvSuccess.visibility = View.GONE
 
         updatePuzzleImage(imagePath)
         initChunks()
